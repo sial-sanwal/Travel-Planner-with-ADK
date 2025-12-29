@@ -102,6 +102,22 @@ response = root_agent.run("Plan a romantic weekend in Kyoto for next month.")
 print(response)
 ```
 
+
+## 🕵️ Visualizing & Debugging with ADK Web UI
+
+ADK comes with a powerful developer UI for monitoring and interacting with your agents.
+
+### Start the Web UI
+```bash
+uv run adk web
+```
+
+### UI Benefits
+*   **Real-Time Tracing**: Watch the agent's "thought process" as it executes. See exactly which tools it calls and why.
+*   **Interactive Debugging**: Chat with your agent in a polished interface that exposes internal state, allowing you to catch logic errors instantly.
+*   **Session Management**: Review past conversations and inspect the full history of agent actions.
+*   **Visual Feedback**: A clean, modern dashboard to validate your multi-agent orchestration without reading raw logs.
+
 ## 📂 File Structure
 
 *   **`travel_planner/agent.py`**: Defines the `root_agent`.
