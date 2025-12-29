@@ -1,13 +1,16 @@
 from google.adk.agents import Agent
 from google.adk.tools.agent_tool import AgentTool
 from travel_planner.tools import google_search_grounding, location_search_tool
+from google.adk.models.lite_llm import LiteLlm
+
 
 
 LLM= "gemini-2.0-flash"
 
 
 news_agent = Agent(
-    model=LLM,
+    # model=LLM,
+    model=LiteLlm(model="openai/gpt-4o"),
     name="news_agent",
     description="Suggests key travel events and news; uses search for current info.",
     instruction="""

@@ -2,11 +2,14 @@ from google.adk.agents import Agent
 
 
 from travel_planner.supporting_agents import travel_inspiration_agent
+from google.adk.models.lite_llm import LiteLlm
+
 
 LLM="gemini-1.5-flash"
 
 root_agent = Agent(
-    model=LLM,
+    # model=LLM,
+    model=LiteLlm(model="openai/gpt-4o"),
     name="travel_planner_main",
     description="A helpful travel planning assistant that helps users plan their trips by providing information and suggestions based on their preferences.",
     instruction="""

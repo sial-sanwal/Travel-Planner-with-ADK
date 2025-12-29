@@ -1,11 +1,14 @@
 from google.adk.tools.google_search_tool import google_search
 from google.adk.agents import Agent
 from google.adk.tools.agent_tool import AgentTool
+from google.adk.models.lite_llm import LiteLlm
+
 
 LLM="gemini-2.0-flash-001"
 
 _search_agent = Agent(
-    model=LLM,
+    # model=LLM,
+    model=LiteLlm(model="openai/gpt-4o"),
     name="google_search_wrapped_agent",
     description="An agent providing Google-search grounding capability",
     instruction= """
