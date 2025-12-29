@@ -1,178 +1,118 @@
+# Travel Planner (Multi‑Agent) – Powered by Google ADK
+
 <div align="center">
-	<h1>Travel Planner (Multi‑Agent) – with Google ADK & uv</h1>
-	<p><em>An experimental multi‑agent travel concierge that researches destinations, surfaces events & nearby places, and inspires trip ideas using Google ADK + open geodata.</em></p>
+	<p><em>An advanced, experimental travel concierge demonstrating the power of the <strong>Google Agent Development Kit (ADK)</strong>.</em></p>
+    <p><em>Orchestrates specialized agents for inspiration, live news research, and geolocation—all grounded in real-world data.</em></p>
 </div>
 
-## Overview
+---
 
-This project demonstrates a lightweight travel planning assistant built on the **Google Agent Development Kit (ADK)**. It composes several specialized agents (news, places, inspiration, search grounding) into a root planner that can:
+## 🚀 Why ADK? (Benefits & Key Factors)
 
-* Suggest destinations & trip ideas
-* Surface relevant travel news / events (web grounded)
-* Find nearby places (hotels, cafes, landmarks) using OpenStreetMap (no API key required)
-* Geocode and contextualize location information
+This project serves as a reference implementation for the **Google Agent Development Kit (ADK)**, showcasing why ADK is a game-changer for building complex, reliable AI systems.
 
-The environment & dependency management use **[uv](https://github.com/astral-sh/uv)** for fast, reliable Python workflows.
+### Key Success Factors of ADK
+*   **Agent-as-a-Tool Pattern**: ADK allows agents to be wrapped as tools for other agents. This **recursive composability** enables hierarchal architectures where a "Manager" agent can reliably delegate complex sub-tasks to "Specialist" agents without managing the low-level logic.
+*   **Modularity & Scalability**: Each agent is a self-contained unit with its own Model, Tools, and Instructions. This makes it easy to swap usage (e.g., using a cheaper model for the "Places" agent and a reasoning-heavy model for the "Planner" agent).
+*   **Structured Orchestration**: Unlike simple prompt chaining, ADK provides a robust framework for defining **typed inputs and outputs**, ensuring that agents communicate effectively and errors are handled gracefully.
 
-## Key Features
+---
 
-* Multi‑agent orchestration via Google ADK `Agent` and `AgentTool`
-* Web search grounding (Google ADK search tool wrapper)
-* Free nearby place lookup powered by Overpass + Nominatim (OpenStreetMap)
-* Composable inspiration agent that internally invokes `news_agent` + `places_agent`
-* Python 3.11+, minimal dependencies (`geopy`, `google-adk`, `python-dotenv`)
+## 🤖 The "Vital Role" of Agents in this Architecture
 
-## Architecture
+In this ADK-based architecture, each agent plays a specific, vital role. The system is designed not as a single monolith, but as a team of experts working together.
 
+| Agent Name | Role & Responsibility | ADK Implementation Highlights |
+| :--- | :--- | :--- |
+| **`travel_planner_main`**<br>*(Root Agent)* | **The Orchestrator**<br>The primary interface for the user. It understands high-level intent (e.g., "Plan a 3-day trip to Paris") and delegates the "thinking" to the Inspiration Agent. | Acts as the entry point. Defined in `agent.py`. Demonstrates how to use other Agents (`travel_inspiration_agent`) as pure tools. |
+| **`travel_inspiration_agent`**<br>*(Sub-Orchestrator)* | **The Domain Expert**<br>Responsible for the creative strategy. It doesn't just guess; it actively consults its own tools (News and Places agents) to build a grounded itinerary. | Encapsulates the logic of "how to plan". It decides *when* to check for events and *when* to find hotels. Defined in `supporting_agents.py`. |
+| **`news_agent`**<br>*(Researcher)* | **The Grounding Source**<br>Fetches real-time info about events, safety, or weather. It ensures the travel plan is relevant *today*, not just based on training data. | Wraps the **Google Search Grounding** tool. Demonstrates how to effectively prompt for bullet-point, actionable intelligence. |
+| **`places_agent`**<br>*(Utility Specialist)* | **The Local Guide**<br>Finds specific, physical locations (hotels, museums, cafes) with precise addresses and geolocation data. | Uses a custom `FunctionTool` (`location_search_tool`) that queries **OpenStreetMap (Overpass API)**, proving ADK can integrate with any external API/Tool freely. |
+
+---
+
+## 🛠 Project Overview
+
+This is a lightweight yet powerful travel planning assistant. It combines the structured reasoning of LLMs with real-world tools to:
+*   Suggest destinations & trip ideas.
+*   Surface relevant travel news/events (Web Grounded).
+*   Find nearby places (hotels, cafes, landmarks) using OpenStreetMap.
+*   Contextualize location information.
+
+**Environment**: Managed by **[uv](https://github.com/astral-sh/uv)** for ultra-fast Python dependency management.
+
+## 🏗 Architecture Diagram
+
+```mermaid
+graph TD
+    User[User] --> Root[Root Agent: Travel Planner]
+    Root --> Inspiration[Inspiration Agent]
+    
+    Inspiration -- "Needs current events" --> News[News Agent]
+    Inspiration -- "Needs specific locations" --> Places[Places Agent]
+    
+    News --> SearchTool[Google Search Grounding]
+    Places --> OSMTool[OpenStreetMap Tool]
 ```
-root_agent (travel_planner_main)
-		└─ travel_inspiration_agent
-					├─ news_agent  (uses google_search_grounding tool)
-					└─ places_agent (uses location_search_tool -> Overpass + Nominatim)
 
-Tools:
-	google_search_grounding -> wraps a search agent providing bullet-point grounded results
-	location_search_tool    -> FunctionTool: find_nearby_places_open(query, location, radius, limit)
-```
+## ⚙️ Setup & Installation
 
-### Agents & Tools Quick Reference
+### Prerequisites
+*   **Python 3.11+**
+*   **Google API Key** (for Gemini models/tools)
+*   **uv** (recommended for dependency management)
 
-| Component | File | Purpose |
-|-----------|------|---------|
-| `root_agent` | `travel_planner/agent.py` | Entry point orchestration agent (delegates to inspiration) |
-| `travel_inspiration_agent` | `travel_planner/supporting_agents.py` | Guides destination discovery, calls news & places agents |
-| `news_agent` | `travel_planner/supporting_agents.py` | Fetches events/news (search grounded) |
-| `places_agent` | `travel_planner/supporting_agents.py` | Suggests specific places given a query |
-| `google_search_grounding` | `travel_planner/tools.py` | AgentTool wrapping search agent for concise bullet results |
-| `location_search_tool` | `travel_planner/tools.py` | Free OSM nearby place finder |
-
-## Prerequisites
-
-* Python 3.11+
-* macOS / Linux / (Windows via WSL) recommended
-* A Google API key (for ADK models/tools) – store it in `.env` as `GOOGLE_API_KEY=...`
-* Homebrew (optional) for installing `uv`
-
-## Setup (via uv)
-
-Install `uv` (choose one):
-
+### 1. Install uv
 ```bash
-brew install uv            # macOS (Homebrew)
-curl -LsSf https://astral.sh/uv/install.sh | sh  # universal script
+# macOS / Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-Create & activate a virtual environment:
-
+### 2. Clone & Sync
 ```bash
+git clone <repo-url>
+cd Travel-planner-with-ADK
 uv venv .venv
-source .venv/bin/activate  # zsh/bash
-```
-
-Sync dependencies from `pyproject.toml`:
-
-```bash
+source .venv/bin/activate
 uv sync
 ```
 
-(If you later add dependencies: `uv add package_name` or edit `pyproject.toml` then run `uv sync` again.)
-
-### Environment Variables
-
-Create a `.env` file in the project root:
-
-```
-GOOGLE_API_KEY=your_key_here
+### 3. Configure Environment
+Create a `.env` file in the root directory:
+```bash
+GOOGLE_API_KEY=your_actual_api_key_here
 ```
 
-Load it automatically with `python-dotenv` (already listed as a dependency).
+## 🚀 Running the Planner
 
-## Running the Project
-
-Simple sanity check:
-
+### Quick Start
+Run the main script to see the agents in action:
 ```bash
 uv run python main.py
 ```
 
-Using agents directly (interactive example in a Python REPL):
+### Interactive Example (Python REPL)
+You can import the agents directly to test different parts of the hierarchy:
 
 ```python
 from travel_planner.agent import root_agent
 
-query = "Family-friendly summer trip in Europe near beaches"
-response = root_agent.run(query)
+# The full workflow
+response = root_agent.run("Plan a romantic weekend in Kyoto for next month.")
 print(response)
 ```
 
-Calling the inspiration agent’s sub-tools explicitly:
+## 📂 File Structure
 
-```python
-from travel_planner.supporting_agents import travel_inspiration_agent
-
-travel_inspiration_agent.run("Find boutique hotels near the Eiffel Tower")
-```
-
-## Extending
-
-* Add a budgeting tool – integrate currency conversion or cost estimation.
-* Plug in itinerary serialization (export to JSON / Markdown).
-* Add caching layer for repeated geocode / Overpass queries.
-* Introduce rate limiting & graceful fallback when Overpass is slow.
-
-## Error Handling & Edge Cases
-
-* Missing geocode results – returns a helpful message instead of raising.
-* Overpass API throttling – current code returns status error; consider retries/backoff.
-* Empty search queries – ensure you validate user inputs before invoking agents.
-
-## Project Structure
-
-```
-travel-planner-with-adk/
-├── main.py
-├── pyproject.toml
-├── README.md
-└── travel_planner/
-		├── agent.py
-		├── supporting_agents.py
-		├── tools.py
-		└── __pycache__/ (ignored)
-```
-
-## Development Workflow Cheatsheet
-
-```bash
-# Add a dependency
-uv add rich
-
-# Update existing lock & install
-uv sync
-
-# Run a module
-uv run python -m travel_planner.agent
-
-# Export pinned requirements (optional)
-uv export --format requirements-txt > requirements.txt
-```
-
-## Troubleshooting
-
-| Issue | Likely Cause | Fix |
-|-------|--------------|-----|
-| `ModuleNotFoundError` | venv not activated | `source .venv/bin/activate` |
-| Slow Overpass responses | Rate limiting | Implement retry/backoff; reduce radius |
-| Empty search results | Query too specific | Broaden terms (e.g., use "hotel" instead of brand) |
-| ADK auth failures | Missing/invalid API key | Check `.env` and environment export |
-
-## License
-
-No explicit license provided yet. Consider adding an OSS license (e.g., MIT) for clarity.
-
-## Disclaimer
-
-This is an experimental prototype; responses may contain inaccuracies. Always verify critical travel details (visa, safety advisories, etc.).
+*   **`travel_planner/agent.py`**: Defines the `root_agent`.
+*   **`travel_planner/supporting_agents.py`**: Defines `travel_inspiration_agent`, `news_agent`, and `places_agent`.
+*   **`travel_planner/tools.py`**: Contains tool definitions (`google_search_grounding`, `location_search_tool`).
+*   **`main.py`**: Entry point for testing.
 
 ---
 
-Made with ❤️ using multi‑agent patterns & fast Python tooling.
+## ⚠️ Disclaimer
+This is an experimental prototype using Generative AI. Responses should be verified for accuracy, especially regarding visas, safety, and bookings.
+
+---
+<p align="center">Made with ❤️ using <strong>Google ADK</strong></p>
